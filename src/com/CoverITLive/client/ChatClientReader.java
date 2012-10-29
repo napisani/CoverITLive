@@ -18,7 +18,8 @@ public class ChatClientReader extends Thread
 	private PropertyChangeSupport messagePropertyChange;
 	private PropertyChangeSupport connectedUserPropertyChange;
 	private ArrayList<String> alConnectedUsers;
-	private String strMessage;
+	
+	private JsonChatObject jChatObj;
 	
 	public ChatClientReader(ChatClientResource chatClientResource)
 	{
@@ -26,15 +27,14 @@ public class ChatClientReader extends Thread
 		this.chatClientResource = chatClientResource;
 		reader = this.chatClientResource.getBufferedReader();
 		alConnectedUsers = new ArrayList<String>();
-		strMessage = "";
-		messagePropertyChange = new PropertyChangeSupport(strMessage);
+		jChatObj = new JsonChatObject();
+		messagePropertyChange = new PropertyChangeSupport(jChatObj);
 		connectedUserPropertyChange = new PropertyChangeSupport(alConnectedUsers);
 	}
 
 	@Override
 	public void run()
 	{
-
 		try
 		{
 			String strSocketInput = "";
@@ -48,21 +48,19 @@ public class ChatClientReader extends Thread
 					
 					if(jChatObjTemp.getRequestType() == MessageType.STANDARD.ordinal())
 					{
-						String strMessageTemp =  jChatObjTemp.getUsername() + 
-												 " ---> " + 
-												 jChatObjTemp.getRecipient() + " : " +
-												 jChatObjTemp.getMessage() +
-												 "\n";
-						messagePropertyChange.firePropertyChange("MESSAGE", strMessage, strMessageTemp);
-						strMessage = strMessageTemp;
+//						if(jChatObjTemp != null && jChatObjTemp.equals(jChatObj)) //if the messages are the same
+//						{
+//							//strMessage += " "; // ensure they are different for the change event
+//						}
+						messagePropertyChange.firePropertyChange("MESSAGE", jChatObj, jChatObjTemp);
+						jChatObj = jChatObjTemp;
 					}
 					else if(jChatObjTemp.getRequestType() == MessageType.GETCONNECTED.ordinal())
 					{
 						connectedUserPropertyChange.firePropertyChange("CONNECTED_USERS", alConnectedUsers, jChatObjTemp.getConnectedUsers());
 						alConnectedUsers = jChatObjTemp.getConnectedUsers();
 					}
-				}
-			   
+				}		   
 			    strSocketInput = reader.readLine();
 			}
 

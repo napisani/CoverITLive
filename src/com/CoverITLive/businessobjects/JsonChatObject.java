@@ -10,15 +10,19 @@ import com.google.gson.JsonParser;
 
 public class JsonChatObject
 {	
-	
+
+	private static int iMessageCount = 0;
 	private String strUsername;
 	private String strRecipient;
 	private String strMessage;
 	private int iRequestType;
 	private ArrayList<String> alConnectedUsers;
+	private int iMessageId;
 	
 	public JsonChatObject()
 	{
+		iMessageCount++;
+		iMessageId = iMessageCount;
 		strUsername = "";
 		strRecipient = "";
 		strMessage = "";
@@ -28,6 +32,8 @@ public class JsonChatObject
 	public JsonChatObject(String strUsername, String strRecipient,
 			String strMessage, int iRequestType)
 	{
+		iMessageCount++;
+		iMessageId = iMessageCount;
 		this.strUsername = strUsername;
 		this.strRecipient = strRecipient;
 		this.strMessage = strMessage;
@@ -36,6 +42,8 @@ public class JsonChatObject
 	}
 	public JsonChatObject(String strJson)
 	{
+		iMessageCount++;
+		iMessageId = iMessageCount;
 		Gson gson =  new Gson();
 	
 		JsonElement jElement = new JsonParser().parse(strJson);
@@ -109,6 +117,30 @@ public class JsonChatObject
 		return jObj;
 	}
 	
+	public int getMessageId()
+	{
+		return iMessageId;
+	}
+	public void setMessageId(int iMessageId)
+	{
+		this.iMessageId = iMessageId;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		boolean bReturn = false;
+		if(obj instanceof JsonChatObject)
+		{
+			if(iMessageId == ((JsonChatObject)obj).getMessageId())
+			{
+				bReturn = true;
+			}
+		}
+		return bReturn;
+	}
+	
+	@Override 
 	public String toString()
 	{
 		return toJsonObject().toString();

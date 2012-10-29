@@ -14,10 +14,7 @@ var nameToUserMap = {};
 
 var server = net.createServer(function(user) {
   user.on('connect', function() {
-    console.log('user connected');
-
-	//chatroom.push(user);    
-	//user.write('hiiii user');    
+    console.log('[connectEvent] a user connected');   
   });
 
   user.on('data', function(data) {
@@ -26,16 +23,28 @@ var server = net.createServer(function(user) {
 	switch(jsObj.requestType)
 	{
 		case RequestType.INITIAL:
-		
 			//handle initial connection signal
-			nameToUserMap[jsObj.sender]=user;
-			console.log('user authenticated');
-			sendInitialConnectedList();
+			if(nameToUserMap[jsObj.sender] != null) //dup name
+			{
+				console.log('[INIT] Duplicate Name Detected');
+				sendError(user);
+			}
+			else
+			{
+				nameToUserMap[jsObj.sender]=user;
+				console.log('[INIT] USER: '+ jsObj.sender +' has been authenticated');
+				sendInitialConnectedList();
+			}
+			
 			
 		break;
 		
 		case RequestType.STANDARD:
-		
+			console.log('[STANDARD MESSAGE]');
+			console.log('Sender: ' + jsObj.sender );
+			console.log('Recipient: ' + jsObj.recipient );
+			console.log('Message: ' + jsObj.message );
+			
 			//where is the message going?
 			if(jsObj.recipient == 'ALL') //messages directed towards everyone
 			{
@@ -46,19 +55,16 @@ var server = net.createServer(function(user) {
 						nameToUserMap[item].write(JSON.stringify(jsObj) + '\n');
 					}
 				}
-				console.log(JSON.stringify(jsObj)+'\n');
 			}
 			else // messages to a single person
 			{
 				if(nameToUserMap[jsObj.recipient] != null)
 				{
-					//nameToUserMap[jsObj.recipient].write(jsObj.message + '\n');
 					nameToUserMap[jsObj.recipient].write(JSON.stringify(jsObj) + '\n');
 				}
 				else
 				{
-					console.log('incorrect destination');
-					//user.write('incorrect destination');
+					console.log('Error: Invalid Recipient!');
 				}
 			}
 		break;
@@ -67,7 +73,7 @@ var server = net.createServer(function(user) {
 
   user.on('end', function() 
   {
-  	console.log('user disconnected');
+  	console.log('User disconnected');
 	var name = "";
 	var connectedNames = [];
 	
@@ -76,20 +82,20 @@ var server = net.createServer(function(user) {
 	{
 	  if (nameToUserMap.hasOwnProperty(item)) 
 	  {
-		console.log(item);
-	  	if(nameToUserMap[item] == user)
+	 	if(nameToUserMap[item] == user)
 		{	
-			name = item;
+			name = item;	//name to remove
 	    }
 		else
 		{
-			connectedNames.push(item);
+			connectedNames.push(item); //otherwise keep it
 	  	}
 	  }
 	}
 	
 	if(name != "")
 	{
+		console.log(name + ' has been DeAuthenticated');
 		delete nameToUserMap[name];
 	}
 	sendUserListToAll(connectedNames);
@@ -109,13 +115,15 @@ var server = net.createServer(function(user) {
   }
   function sendUserListToAll(names)
   {
+	console.log('[sendUserListToAll] Sending a list of names to all Connected clients..');
 	var oJson = {};
 	oJson.sender = "";
 	oJson.recipient = "";
 	oJson.message = "";
 	oJson.requestType = RequestType.GETCONNECTED;
 	oJson.connectedUsers = names;
-	console.log(JSON.stringify(oJson) + '\n');
+	
+	//console.log(JSON.stringify(oJson) + '\n');
 	for (var item in nameToUserMap)
 	{
 		if (nameToUserMap.hasOwnProperty(item)) 
@@ -125,7 +133,18 @@ var server = net.createServer(function(user) {
   	 }
   }
 
-
+  function sendError(user)
+  {
+	console.log('[sendError] Sending an error to a connected user');
+	var oJson = {};
+	oJson.sender = "";
+	oJson.recipient = "";
+	oJson.message = "That username is already signed in.";
+	oJson.requestType = RequestType.ERROR;
+	oJson.connectedUsers = {};
+	
+	user.write(JSON.stringify(oJson) + '\n');
+  }
 });
 
 server.listen(3000);

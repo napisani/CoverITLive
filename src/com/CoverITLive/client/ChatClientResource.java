@@ -20,30 +20,17 @@ public class ChatClientResource
 	protected BufferedWriter bufferedWriter = null;
 	
 	
-	public ChatClientResource(String serverName, int serverPort)
+	public ChatClientResource(String serverName, int serverPort) throws UnknownHostException, IOException
 	{
 		System.out.println("Establishing connection. Please wait ...");
-		try
-		{
-			socket = new Socket(serverName, serverPort);
-			System.out.println("Connected: " + socket);
-	
-			sysIn = new Scanner(System.in);
-			bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		socket = new Socket(serverName, serverPort);
+		System.out.println("Connected: " + socket);
+
+		sysIn = new Scanner(System.in);
+		bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+		bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		
-			System.out.println("Finished opening streams");
-		} 
-		catch (UnknownHostException uhe)
-		{
-			System.out.println("Host unknown: " + uhe.getMessage());
-		} 
-		catch (IOException ioe)
-		{
-			System.out.println("Unexpected exception: " + ioe.getMessage());
-		}
-		
-		
+		System.out.println("Finished opening streams");
 	}
 	
 	public Socket getSocket()
