@@ -9,19 +9,15 @@ var RequestType =
 	ERROR: 3
 }
 
-//var chatroom = [];
 var nameToUserMap = {};
 
 var server = net.createServer(function(user) {
   user.on('connect', function() {
     console.log('[connectEvent] a user connected');   
   });
-
   user.on('data', function(data) {
 	var jsObj = JSON.parse(data);
-	
-	switch(jsObj.requestType)
-	{
+	switch(jsObj.requestType){
 		case RequestType.INITIAL:
 			//handle initial connection signal
 			if(nameToUserMap[jsObj.sender] != null) //dup name
@@ -35,10 +31,7 @@ var server = net.createServer(function(user) {
 				console.log('[INIT] USER: '+ jsObj.sender +' has been authenticated');
 				sendInitialConnectedList();
 			}
-			
-			
-		break;
-		
+			break;
 		case RequestType.STANDARD:
 			console.log('[STANDARD MESSAGE]');
 			console.log('Sender: ' + jsObj.sender );
@@ -52,7 +45,14 @@ var server = net.createServer(function(user) {
 				{
 					if (nameToUserMap.hasOwnProperty(item)) 
 				    {
-						nameToUserMap[item].write(JSON.stringify(jsObj) + '\n');
+						try
+						{
+							nameToUserMap[item].write(JSON.stringify(jsObj) + '\n');
+						}
+						catch(ex)
+						{
+							console.log('ERROR SENDING MESSAGE TO: ' + item);
+						}
 					}
 				}
 			}
@@ -60,7 +60,14 @@ var server = net.createServer(function(user) {
 			{
 				if(nameToUserMap[jsObj.recipient] != null)
 				{
-					nameToUserMap[jsObj.recipient].write(JSON.stringify(jsObj) + '\n');
+					try
+					{
+						nameToUserMap[jsObj.recipient].write(JSON.stringify(jsObj) + '\n');
+					}
+					catch(ex)
+					{
+						console.log('ERROR SENDING MESSAGE TO: ' + jsObj.recipient);
+					}
 				}
 				else
 				{
@@ -113,6 +120,7 @@ var server = net.createServer(function(user) {
 	 }
 	 sendUserListToAll(connectedNames);
   }
+  
   function sendUserListToAll(names)
   {
 	console.log('[sendUserListToAll] Sending a list of names to all Connected clients..');
@@ -123,16 +131,22 @@ var server = net.createServer(function(user) {
 	oJson.requestType = RequestType.GETCONNECTED;
 	oJson.connectedUsers = names;
 	
-	//console.log(JSON.stringify(oJson) + '\n');
 	for (var item in nameToUserMap)
 	{
 		if (nameToUserMap.hasOwnProperty(item)) 
 	    {
-			nameToUserMap[item].write(JSON.stringify(oJson) + '\n');
+			try
+			{
+				nameToUserMap[item].write(JSON.stringify(oJson) + '\n');
+			}
+			catch(ex)
+			{
+				console.log('ERROR SENDING MESSAGE TO: ' + item);
+			}
 		}
   	 }
   }
-
+  
   function sendError(user)
   {
 	console.log('[sendError] Sending an error to a connected user');
@@ -142,8 +156,14 @@ var server = net.createServer(function(user) {
 	oJson.message = "That username is already signed in.";
 	oJson.requestType = RequestType.ERROR;
 	oJson.connectedUsers = {};
-	
-	user.write(JSON.stringify(oJson) + '\n');
+	try
+	{
+		user.write(JSON.stringify(oJson) + '\n');
+  	}
+	catch(ex)
+	{
+		console.log('ERROR SENDING ERROR MESSAGE');
+	}
   }
 });
 

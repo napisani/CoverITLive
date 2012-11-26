@@ -125,7 +125,7 @@ public class ClientPanel extends JPanel implements ActionListener, KeyListener
 								 " ---> " +
 								 strRecipient +
 								 " : " + 
-								 strMessage);
+								 strMessage + "\n");
 			}
 		}
 	}

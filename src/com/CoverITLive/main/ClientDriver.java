@@ -16,7 +16,7 @@ public class ClientDriver
 		ChatClient oChatClient = new ChatClient("127.0.0.1", 3000);
 		oChatClient.start();
 	}
-	public static void main(String[] args) throws IOException
+	public static void main2(String[] args) throws IOException
 	{
 		String strUsername;
 		System.out.println("CoverITLive Started");

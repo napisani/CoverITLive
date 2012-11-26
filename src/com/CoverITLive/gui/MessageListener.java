@@ -30,7 +30,7 @@ public class MessageListener implements PropertyChangeListener
 			String strMessage =  jChatObj.getUsername() + 
 								 " ---> " + 
 								 jChatObj.getRecipient() + " : " +
-								 jChatObj.getMessage();
+								 jChatObj.getMessage() + "\n";
 			
 			ClientPanel cPanel;
 			

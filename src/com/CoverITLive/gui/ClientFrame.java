@@ -55,8 +55,8 @@ public class ClientFrame extends JFrame
 		String strHostAddress;
 		do
 		{
-			strHostAddress = "127.0.0.1";
-			//strHostAddress = JOptionPane.showInputDialog("Enter your host address");
+			//strHostAddress = "127.0.0.1";
+			strHostAddress = JOptionPane.showInputDialog("Enter your host address");
 		}while(strHostAddress == null || strHostAddress.isEmpty());
 		try
 		{
