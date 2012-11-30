@@ -17,19 +17,19 @@ public class ChatClientReader extends Thread
 	private BufferedReader reader;
 	private PropertyChangeSupport messagePropertyChange;
 	private PropertyChangeSupport connectedUserPropertyChange;
-	private ArrayList<String> alConnectedUsers;
+	private JsonChatObject jChatObjStandard;
+	private JsonChatObject jChatObjConnectedUsers;
 	
-	private JsonChatObject jChatObj;
 	
 	public ChatClientReader(ChatClientResource chatClientResource)
 	{
 		super();
 		this.chatClientResource = chatClientResource;
 		reader = this.chatClientResource.getBufferedReader();
-		alConnectedUsers = new ArrayList<String>();
-		jChatObj = new JsonChatObject();
-		messagePropertyChange = new PropertyChangeSupport(jChatObj);
-		connectedUserPropertyChange = new PropertyChangeSupport(alConnectedUsers);
+		jChatObjStandard = new JsonChatObject();
+		jChatObjConnectedUsers = new JsonChatObject();
+		messagePropertyChange = new PropertyChangeSupport(jChatObjStandard);
+		connectedUserPropertyChange = new PropertyChangeSupport(jChatObjConnectedUsers);
 	}
 
 	@Override
@@ -42,23 +42,19 @@ public class ChatClientReader extends Thread
 			{	
 				if(strSocketInput != null && strSocketInput.isEmpty() == false)
 				{
-					System.out.println("Message From Group: " + strSocketInput);
+					//System.out.println("Message From Group: " + strSocketInput);
 					
 					JsonChatObject jChatObjTemp = new JsonChatObject(strSocketInput);
 					
 					if(jChatObjTemp.getRequestType() == MessageType.STANDARD.ordinal())
 					{
-//						if(jChatObjTemp != null && jChatObjTemp.equals(jChatObj)) //if the messages are the same
-//						{
-//							//strMessage += " "; // ensure they are different for the change event
-//						}
-						messagePropertyChange.firePropertyChange("MESSAGE", jChatObj, jChatObjTemp);
-						jChatObj = jChatObjTemp;
+						messagePropertyChange.firePropertyChange("MESSAGE", jChatObjStandard, jChatObjTemp);
+						jChatObjStandard = jChatObjTemp;
 					}
 					else if(jChatObjTemp.getRequestType() == MessageType.GETCONNECTED.ordinal())
 					{
-						connectedUserPropertyChange.firePropertyChange("CONNECTED_USERS", alConnectedUsers, jChatObjTemp.getConnectedUsers());
-						alConnectedUsers = jChatObjTemp.getConnectedUsers();
+						connectedUserPropertyChange.firePropertyChange("CONNECTED_USERS", jChatObjConnectedUsers, jChatObjTemp);
+						jChatObjConnectedUsers = jChatObjTemp;
 					}
 				}		   
 			    strSocketInput = reader.readLine();

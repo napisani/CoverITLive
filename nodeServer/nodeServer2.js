@@ -130,20 +130,18 @@ var server = net.createServer(function(user) {
 	oJson.message = "";
 	oJson.requestType = RequestType.GETCONNECTED;
 	oJson.connectedUsers = names;
-	
+	console.log(JSON.stringify(oJson) + '\n');
 	for (var item in nameToUserMap)
 	{
-		if (nameToUserMap.hasOwnProperty(item)) 
-	    {
-			try
-			{
-				nameToUserMap[item].write(JSON.stringify(oJson) + '\n');
-			}
-			catch(ex)
-			{
-				console.log('ERROR SENDING MESSAGE TO: ' + item);
-			}
+		try
+		{
+			nameToUserMap[item].write(JSON.stringify(oJson) + '\n');
 		}
+		catch(ex)
+		{
+			console.log('ERROR SENDING MESSAGE TO: ' + item);
+		}
+		
   	 }
   }
   

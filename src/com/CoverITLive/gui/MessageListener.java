@@ -54,10 +54,11 @@ public class MessageListener implements PropertyChangeListener
 		}
 		else if(pcEvent.getPropertyName() != null && pcEvent.getPropertyName().equals("CONNECTED_USERS"))
 		{
-			ArrayList<String> alConnectedUsers = (ArrayList<String>) pcEvent.getNewValue();
+			ArrayList<String> alConnectedUsers = ((JsonChatObject) pcEvent.getNewValue()).getConnectedUsers();
 			
 			// explicitly add the ALL recipient to all 
 			alConnectedUsers.add("ALL");
+			//System.out.println(alConnectedUsers.toString());
 			selectorPanel.setRecipientList(alConnectedUsers);
 			jFrame.repaint();
 		}

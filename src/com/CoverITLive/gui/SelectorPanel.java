@@ -30,6 +30,7 @@ public class SelectorPanel extends JPanel implements ListSelectionListener
 	private HashMap<String, ClientPanel> hmRecipientToPanel;
 	private ChatClientWriter chatWriter;
 	private Box boxRightCurrent;
+	private Box boxLeftCurrent;
 	private String strCurrentName;
 	
 	public SelectorPanel(String strUsername, ChatClientWriter chatWriter) 
@@ -53,8 +54,9 @@ public class SelectorPanel extends JPanel implements ListSelectionListener
 	    Box leftBox = new Box(BoxLayout.Y_AXIS);
 	    Box rightBox = new Box(BoxLayout.Y_AXIS);
 	    
-	    // set the current right box so it can be changed later
+	    // set the current box so it can be changed later
 	    boxRightCurrent = rightBox;
+	    boxLeftCurrent = leftBox;
 	    
 	    //add hooks for selection listener
 	    jlRecipients.addListSelectionListener(this);
@@ -148,16 +150,51 @@ public class SelectorPanel extends JPanel implements ListSelectionListener
 	}
 	
 	public void setRecipientList(ArrayList<String> alNewRecipients)
-	{	
+	{
+		recipListModel = new DefaultListModel();
+
+		for(String strRecipient: alNewRecipients)
+		{
+			recipListModel.addElement(strRecipient);
+		}
 		
+		jlRecipients = new JList(recipListModel);
+		
+		//add the list to a scrolling pane
+	    JScrollPane pane = new JScrollPane(jlRecipients);
+	    
+	    //add hooks for selection listener
+	    jlRecipients.addListSelectionListener(this);
+
+	    //  Format the list and the buttons in a vertical box
+	    Box leftBox = new Box(BoxLayout.Y_AXIS);
+	    leftBox.add(pane);
+	    remove(boxLeftCurrent);
+	    add(leftBox,  BorderLayout.WEST);
+	    boxLeftCurrent = leftBox;
+	    
+	    cleanUpRecipientMap(alNewRecipients);
+		
+		revalidate();
+		repaint();
+	}
+	
+	
+	//flukey 
+	/*
+	public void setRecipientList2(ArrayList<String> alNewRecipients)
+	{
 		recipListModel.removeAllElements();
 		for(String strRecipient: alNewRecipients)
 		{
 			recipListModel.addElement(strRecipient);
 		}
 		cleanUpRecipientMap(alNewRecipients);
+		
 		revalidate();
+		repaint();
 	}
+	*/
 	
 	public JList getJlRecipients()
 	{
